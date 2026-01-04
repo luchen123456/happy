@@ -19,6 +19,9 @@ const FireworkCanvas = forwardRef<FireworkCanvasHandle, FireworkCanvasProps>((pr
   // Helper to calculate font size based on screen width
   const getFontSize = () => Math.min(window.innerWidth / 5, 120);
 
+  // Helper to get font string with Chinese support
+  const getFontString = (size: number) => `bold ${size}px "Cinzel", "PingFang SC", "Microsoft YaHei", "Heiti SC", sans-serif`;
+
   // Helper to get pixel coordinates for text
   const getTextCoordinates = (text: string, fontSize: number): { x: number; y: number }[] => {
     const offCanvas = document.createElement('canvas');
@@ -28,7 +31,7 @@ const FireworkCanvas = forwardRef<FireworkCanvasHandle, FireworkCanvasProps>((pr
     // Make canvas large enough to hold the text
     offCanvas.width = window.innerWidth; 
     offCanvas.height = 300;
-    offCtx.font = `bold ${fontSize}px Cinzel, serif`;
+    offCtx.font = getFontString(fontSize);
     offCtx.fillStyle = '#ffffff';
     offCtx.textAlign = 'center';
     offCtx.textBaseline = 'middle';
@@ -108,7 +111,7 @@ const FireworkCanvas = forwardRef<FireworkCanvasHandle, FireworkCanvasProps>((pr
     let textWidth = 200; // default fallback
     
     if (ctx) {
-      ctx.font = `bold ${fontSize}px Cinzel, serif`;
+      ctx.font = getFontString(fontSize);
       textWidth = ctx.measureText(text).width;
     }
 

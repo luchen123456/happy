@@ -13,14 +13,25 @@ const App: React.FC = () => {
   const [showFortune, setShowFortune] = useState(false);
   const [wishText, setWishText] = useState('');
 
-  // Auto-launch welcome fireworks
+  // Auto-launch welcome fireworks sequence
   useEffect(() => {
-    const timer = setTimeout(() => {
-      if (fireworkRef.current) {
-        fireworkRef.current.launch("2026");
-      }
-    }, 1000);
-    return () => clearTimeout(timer);
+    const sequence = ['2026', '祝：', '小宝', '健康', '快乐', '顺利毕业！'];
+    const timeoutIds: NodeJS.Timeout[] = [];
+
+    sequence.forEach((text, index) => {
+      // Stagger them: first one at 800ms, then every 2200ms to allow previous one to bloom
+      const delay = 800 + (index * 2200);
+      const id = setTimeout(() => {
+        if (fireworkRef.current) {
+          fireworkRef.current.launch(text);
+        }
+      }, delay);
+      timeoutIds.push(id);
+    });
+
+    return () => {
+      timeoutIds.forEach(clearTimeout);
+    };
   }, []);
 
   const handleWishSubmit = async (wish: string) => {
