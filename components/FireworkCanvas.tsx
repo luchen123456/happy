@@ -126,7 +126,6 @@ const FireworkCanvas = forwardRef<FireworkCanvasHandle, FireworkCanvasProps>((pr
     }
 
     // 2. Determine Safe Y Range (Top 10% - 30%)
-    // This keeps it above the central "Happy New Year" text usually
     const targetY = canvas.height * 0.1 + Math.random() * (canvas.height * 0.2);
     
     // Original Pastel/Neon Palette
@@ -156,9 +155,16 @@ const FireworkCanvas = forwardRef<FireworkCanvasHandle, FireworkCanvasProps>((pr
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Clear with trail effect
-    ctx.fillStyle = 'rgba(15, 23, 42, 0.2)'; 
+    // Use destination-out to fade existing pixels to transparent
+    // This allows the SnowCanvas behind it to show through!
+    ctx.save();
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.2)'; // Adjust opacity for trail length (lower = longer)
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.restore();
+
+    // Reset composite operation to draw new stuff on top
+    ctx.globalCompositeOperation = 'source-over';
 
     // Update Rockets
     for (let i = rocketsRef.current.length - 1; i >= 0; i--) {
@@ -259,7 +265,7 @@ const FireworkCanvas = forwardRef<FireworkCanvasHandle, FireworkCanvasProps>((pr
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 z-0 pointer-events-none"
+      className="fixed inset-0 z-10 pointer-events-none" // z-10 puts it above snow (z-0)
     />
   );
 });

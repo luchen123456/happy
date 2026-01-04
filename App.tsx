@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import FireworkCanvas, { FireworkCanvasHandle } from './components/FireworkCanvas';
+import SnowCanvas from './components/SnowCanvas';
 import WishForm from './components/WishForm';
 import FortuneDisplay from './components/FortuneDisplay';
 import { generateFortune } from './services/geminiService';
@@ -53,19 +54,12 @@ const App: React.FC = () => {
       }, 500);
     } else if (isLoading) {
       // If still loading when exploded, wait for loading to finish then show
-      // We'll handle this effect by checking state changes or just simple delay in submit
     }
   };
 
   // Watch for fortune readiness if explosion happened while loading
   useEffect(() => {
     if (!isLoading && fortune && wishText) {
-       // If the fetch finished after the explosion callback might have missed it, 
-       // or ensures it shows up. 
-       // Simple approach: Use a timer in handleWishSubmit for the UI reveal 
-       // OR rely on the user watching the firework.
-       // Let's rely on the explosion callback to trigger `setShowFortune` 
-       // but if `fortune` isn't ready there, we need to trigger it here.
        const timer = setTimeout(() => setShowFortune(true), 1500); 
        return () => clearTimeout(timer);
     }
@@ -79,13 +73,16 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="relative min-h-screen w-full flex flex-col items-center overflow-hidden">
+    <div className="relative min-h-screen w-full flex flex-col items-center overflow-hidden bg-slate-900">
       
       {/* Background Visuals */}
+      {/* Snow sits at the bottom layer (z-0) */}
+      <SnowCanvas />
+      {/* Fireworks sits on top of snow (z-10), with transparency for trails */}
       <FireworkCanvas ref={fireworkRef} onExplode={handleExplosion} />
       
       {/* Header / Brand */}
-      <header className="absolute top-0 left-0 right-0 p-6 flex justify-between items-center z-10 pointer-events-none">
+      <header className="absolute top-0 left-0 right-0 p-6 flex justify-between items-center z-20 pointer-events-none">
         <div className="flex items-center space-x-2">
           <Star className="text-yellow-400 fill-yellow-400 w-6 h-6 animate-spin-slow" />
           <span className="text-white font-cinzel text-xl font-bold tracking-widest drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]">
@@ -95,7 +92,7 @@ const App: React.FC = () => {
       </header>
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col items-center justify-center w-full z-10 p-4 transition-all duration-500">
+      <main className="flex-1 flex flex-col items-center justify-center w-full z-20 p-4 transition-all duration-500">
         
         {/* Title Section - Fades out when fortune is shown to reduce clutter */}
         <div className={`text-center mb-12 transition-opacity duration-500 ${showFortune ? 'opacity-20 blur-sm' : 'opacity-100'}`}>
@@ -123,7 +120,7 @@ const App: React.FC = () => {
       />
 
       {/* Footer */}
-      <footer className="absolute bottom-2 w-full text-center text-slate-600 text-[10px] z-10 font-mono pointer-events-none">
+      <footer className="absolute bottom-2 w-full text-center text-slate-600 text-[10px] z-20 font-mono pointer-events-none">
         POWERED BY GEMINI 3 FLASH • 2026 EDITION
       </footer>
     </div>
