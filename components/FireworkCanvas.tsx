@@ -16,8 +16,24 @@ const FireworkCanvas = forwardRef<FireworkCanvasHandle, FireworkCanvasProps>((pr
   const rocketsRef = useRef<Rocket[]>([]);
   const animationFrameRef = useRef<number>(0);
 
-  // Helper to calculate font size based on screen width
-  const getFontSize = () => Math.min(window.innerWidth / 5, 120);
+  // Helper to calculate font size based on screen width AND text length
+  const getFontSize = (text: string) => {
+    const maxWidth = window.innerWidth * 0.85; // Use 85% of screen width max
+    const baseSize = Math.min(window.innerWidth / 5, 120);
+    
+    // Estimate width: CJK ~ 1em, Latin ~ 0.6em
+    let estimatedWidth = 0;
+    for (let i = 0; i < text.length; i++) {
+        estimatedWidth += (text.charCodeAt(i) > 255 ? 1 : 0.6) * baseSize;
+    }
+
+    if (estimatedWidth > maxWidth) {
+        // Scale down to fit
+        const ratio = maxWidth / estimatedWidth;
+        return Math.floor(baseSize * ratio);
+    }
+    return baseSize;
+  };
 
   // Helper to get font string with Chinese support
   const getFontString = (size: number) => `bold ${size}px "Cinzel", "PingFang SC", "Microsoft YaHei", "Heiti SC", sans-serif`;
@@ -30,7 +46,7 @@ const FireworkCanvas = forwardRef<FireworkCanvasHandle, FireworkCanvasProps>((pr
 
     // Make canvas large enough to hold the text
     offCanvas.width = window.innerWidth; 
-    offCanvas.height = 300;
+    offCanvas.height = Math.max(300, fontSize * 2);
     offCtx.font = getFontString(fontSize);
     offCtx.fillStyle = '#ffffff';
     offCtx.textAlign = 'center';
@@ -45,8 +61,9 @@ const FireworkCanvas = forwardRef<FireworkCanvasHandle, FireworkCanvasProps>((pr
     const data = imageData.data;
     const coords: { x: number; y: number }[] = [];
 
-    // Sampling rate to reduce particle count
-    const gap = 3; 
+    // Sampling rate to reduce particle count. 
+    // Scale gap with font size to maintain performance for huge letters but detail for small ones.
+    const gap = Math.max(3, Math.floor(fontSize / 30)); 
 
     for (let y = 0; y < offCanvas.height; y += gap) {
       for (let x = 0; x < offCanvas.width; x += gap) {
@@ -64,7 +81,7 @@ const FireworkCanvas = forwardRef<FireworkCanvasHandle, FireworkCanvasProps>((pr
   };
 
   const createParticles = (x: number, y: number, text: string, color: string) => {
-    const fontSize = getFontSize();
+    const fontSize = getFontSize(text);
     const coords = getTextCoordinates(text, fontSize);
     
     coords.forEach(coord => {
@@ -106,7 +123,7 @@ const FireworkCanvas = forwardRef<FireworkCanvasHandle, FireworkCanvasProps>((pr
     const canvas = canvasRef.current;
     
     // 1. Measure Text to Determine Safe X Range
-    const fontSize = getFontSize();
+    const fontSize = getFontSize(text);
     const ctx = canvas.getContext('2d');
     let textWidth = 200; // default fallback
     
@@ -121,7 +138,7 @@ const FireworkCanvas = forwardRef<FireworkCanvasHandle, FireworkCanvasProps>((pr
 
     let x: number;
     if (minX >= maxX) {
-      // Text is too wide, just center it
+      // Text is too wide (even after scaling), just center it
       x = canvas.width / 2;
     } else {
       // Random X within safe bounds

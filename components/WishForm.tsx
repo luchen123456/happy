@@ -30,7 +30,7 @@ const WishForm: React.FC<WishFormProps> = ({ onSubmit, disabled }) => {
             disabled={disabled}
             placeholder="Make a wish for 2026..."
             className="flex-1 bg-transparent border-none text-white placeholder-slate-400 focus:ring-0 px-3 py-2 outline-none font-medium"
-            maxLength={12} // Limit length for better firework rendering
+            maxLength={100} 
           />
           <button
             type="submit"
@@ -46,7 +46,7 @@ const WishForm: React.FC<WishFormProps> = ({ onSubmit, disabled }) => {
         </div>
       </div>
       <p className="text-center text-slate-500 text-xs mt-2">
-        Tip: Keep it short (e.g. "Wealth", "Love") for the best firework shape!
+        Tip: Type a full sentence! We'll light it up word by word.
       </p>
     </form>
   );
